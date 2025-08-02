@@ -237,7 +237,7 @@ function drawButton(btn) {
   ctx.fillRect(btn.x, btn.y, btn.width, btn.height);
   ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
   ctx.fillStyle = 'white';
-  ctx.font = '24px Arial';
+  ctx.font = '24px MyFont, Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(btn.text, btn.x + btn.width / 2, btn.y + btn.height / 2);

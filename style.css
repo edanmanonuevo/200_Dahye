@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'MyFont';
-  src: url('assets/fonts/Humming.otf') format('opentype'),
+  src: url('assets/fonts/Humming.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
