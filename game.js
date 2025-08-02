@@ -42,17 +42,24 @@ let tilesetImage = new Image();
 let tileset = null;
 
 const mapDialogues = {
-  "Korea.tmj": "Welcome to Korea! Explore the bustling streets and enjoy the culture.",
-  "Sydney.tmj": "Welcome to Sydney! Watch out for kangaroos and enjoy the Opera House.",
-  "Newcastle.tmj": "Welcome to Newcastle! A quiet town with beautiful beaches."
+  "Korea.tmj": "Korea - December 2023.\n\nMake your way to Incheon Airport for a surprise holiday.",
+  "Sydney.tmj": "Welcome to Sydney!\n\nWe hope you enjoy your holiday\n\nEnter the red car to drive to Newcastle.",
+  "Newcastle.tmj": "You have arrived at Merriweather Beach!\n\nHave some fun and enjoy the beach.\n\nCheck out the shop for some fish and chips.\n\nAfter you are done make your way back to Sydney before you go back home to Korea.",
+  "LastDay.tmj": "It's your last day in Sydney.\n\nMake sure to visit all your favorite spots one last time.\n\nAfter taking a photo at the photobooth, it's time to head to the airport.",
+  "Bedroom1.tmj": "Welcome back home!.\n\nLooks like you got an Instagram DM from a friend back in Sydney :0.",
+  "Cinema.tmj": "Teleparty Room!\n\nLet's watch some dramas together :)",
+  "Museum.tmj": "Oh, look who's in Korea!\n\nEnjoy the next few days together.\n\nEat some food, explore the National Museum of Korea, and go shopping.\n\nAfter that, make your way to the cafe one last time together.",
+  "Cafe.tmj": "TOM N TOM'S COFFEE\n\nLooks like someone's a bit late...\n\nWait for your friend to arrive and talk things out before he leaves to go back to Sydneyㅠㅠ.\n\n(I miss you alreadyㅠㅠ I cried after we said goodbye...).",
+  "Bedroom2.tmj": "Back home.\n\nHe's in Sydney, and you both keep in touch...\n\n and one day, he asks you to be his girlfriend <3\n\n.",
+  "Camping.tmj": "200일 축하해!\n\nCan you believe its been 555 days since the first day we met\n\nI'm so happy to have met you that day and to be your boyfriend hehe.\n\nI LOVE YOU <3",
 };
 
 let gameState = "start"; // 'start', 'controls', 'playing'
 
 // Buttons on start screen
 const startButtons = [
-  { text: "Controls", x: 140, y: 180, width: 200, height: 50 },
-  { text: "Play", x: 140, y: 250, width: 200, height: 50 },
+  { text: "Controls", x: canvas.width / 2 - 100, y: 180 + 50, width: 200, height: 50 },
+  { text: "Play", x: canvas.width / 2 - 100, y: 250 + 50, width: 200, height: 50 },
 ];
 
 let controlsCloseButton = null;
@@ -74,6 +81,12 @@ function loadNewMap(mapPath) {
       } else {
         player.x = 7; // default
         player.y = 6; // default
+      }
+
+      if (mapDialogues[mapName]) {
+        updateDialogue(mapDialogues[mapName]);
+      } else {
+        updateDialogue("");
       }
 
       const tilesetInfo = data.tilesets[0];
@@ -232,15 +245,22 @@ function drawButton(btn) {
 
 function drawStartScreen() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#336699";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = 'white';
-  ctx.font = '48px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText("My 2D Game", canvas.width / 2, 100);
+  // Create and use a pattern from an image
+  const bgImg = new Image();
+  bgImg.src = "assets/other/start-bg.png"; // Use your image path
 
-  startButtons.forEach(drawButton);
+  bgImg.onload = function() {
+    const pattern = ctx.createPattern(bgImg, "repeat");
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'white';
+    ctx.font = '48px Arial';
+    ctx.textAlign = 'center';
+
+    startButtons.forEach(drawButton);
+  };
 }
 
 function drawControlsScreen() {
@@ -393,16 +413,22 @@ canvas.addEventListener("click", (e) => {
 
 function updateDialogue(text) {
   const dialogueText = document.getElementById("dialogueText");
-  dialogueText.textContent = ""; // Clear existing text
+  dialogueText.innerHTML = ""; // Use innerHTML for <br> support
 
   let index = 0;
+  let html = "";
 
-  // Typewriting effect
+  // Typewriting effect with line breaks
   const typeWriter = () => {
     if (index < text.length) {
-      dialogueText.textContent += text[index];
+      if (text[index] === "\n") {
+        html += "<br>";
+      } else {
+        html += text[index];
+      }
+      dialogueText.innerHTML = html;
       index++;
-      setTimeout(typeWriter, 50); // Adjust typing speed (50ms per letter)
+      setTimeout(typeWriter, 50);
     }
   };
 
