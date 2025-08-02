@@ -12,6 +12,19 @@ let player = {
   sprite: "down"
 };
 
+const mapSpawns = {
+  "Korea.tmj": { x: 3, y: 3 },
+  "Sydney.tmj": { x: 1, y: 6 },
+  "Newcastle.tmj": { x: 7, y: 4 },
+  "LastDay.tmj": { x: 0, y: 10 },
+  "Bedroom1.tmj": { x: 7, y: 6 },
+  "Cinema.tmj": { x: 8, y: 8 },
+  "Museum.tmj": { x: 12, y: 4 },
+  "Cafe.tmj": { x: 8, y: 7 },
+  "Bedroom2.tmj": { x: 6, y: 6 },
+  "Camping.tmj": { x: 2, y: 11 },
+};
+
 const tileImages = {
   up: new Image(),
   down: new Image(),
@@ -46,65 +59,76 @@ let controlsCloseButton = null;
 
 // Load a new map and reset player position
 let transitions = []; // Store transition points for the current map
-let tilesets = []; // Store all tilesets for the current map
 
 function loadNewMap(mapPath) {
   fetch(mapPath)
     .then(res => res.json())
     .then(async data => {
       mapData = data;
+      
+      // Set spawn point based on map filename
+      const mapName = mapPath.split("/").pop();
+      if (mapSpawns[mapName]) {
+        player.x = mapSpawns[mapName].x;
+        player.y = mapSpawns[mapName].y;
+      } else {
+        player.x = 7; // default
+        player.y = 6; // default
+      }
 
-      // Reset player position
-      player.x = 7;
-      player.y = 6;
+      const tilesetInfo = data.tilesets[0];
+      if (!tilesetInfo || !tilesetInfo.source) {
+        console.error("No external tileset found in map data");
+        return;
+      }
 
-      // Load all tilesets
-      tilesets = await Promise.all(
-        data.tilesets.map(async tilesetInfo => {
-          const tsxPath = `assets/tilesets/${tilesetInfo.source}`;
-          const tsxText = await fetch(tsxPath).then(res => res.text());
-          const parser = new DOMParser();
-          const tsxDoc = parser.parseFromString(tsxText, "application/xml");
+      const tsxPath = `assets/tilesets/${tilesetInfo.source}`;
+      try {
+        const tsxText = await fetch(tsxPath).then(res => {
+          if (!res.ok) throw new Error(`Failed to fetch tileset: ${res.status} ${res.statusText}`);
+          return res.text();
+        });
+        const parser = new DOMParser();
+        const tsxDoc = parser.parseFromString(tsxText, "application/xml");
 
-          const imageEl = tsxDoc.querySelector("image");
-          const tilesetName = tsxDoc.querySelector("tileset").getAttribute("name");
-          const tileWidth = parseInt(tsxDoc.querySelector("tileset").getAttribute("tilewidth"));
-          const tileHeight = parseInt(tsxDoc.querySelector("tileset").getAttribute("tileheight"));
-          const imageSource = imageEl.getAttribute("source");
-          const imageWidth = parseInt(imageEl.getAttribute("width"));
-          const imageHeight = parseInt(imageEl.getAttribute("height"));
+        const imageEl = tsxDoc.querySelector("image");
+        if (!imageEl) throw new Error("Tileset image element not found in TSX file.");
 
-          const tilesetImage = new Image();
-          tilesetImage.src = `assets/tilesets/${imageSource}`;
+        const tilesetName = tsxDoc.querySelector("tileset").getAttribute("name");
+        const tileWidth = parseInt(tsxDoc.querySelector("tileset").getAttribute("tilewidth"));
+        const tileHeight = parseInt(tsxDoc.querySelector("tileset").getAttribute("tileheight"));
+        const imageSource = imageEl.getAttribute("source");
+        const imageWidth = parseInt(imageEl.getAttribute("width"));
+        const imageHeight = parseInt(imageEl.getAttribute("height"));
 
-          const walkable = {};
-          const tileElements = tsxDoc.querySelectorAll("tile");
-          tileElements.forEach(tileEl => {
-            const id = parseInt(tileEl.getAttribute("id"));
-            const properties = tileEl.querySelectorAll("property");
-            properties.forEach(prop => {
-              if (prop.getAttribute("name") === "walkable") {
-                walkable[id] = prop.getAttribute("value") === "true";
-              }
-            });
+        tilesetImage.src = `assets/tilesets/${imageSource}`;
+        tileset = {
+          firstgid: tilesetInfo.firstgid,
+          name: tilesetName,
+          tileWidth,
+          tileHeight,
+          imagewidth: imageWidth,
+          imageheight: imageHeight,
+          walkable: {}, // Store walkable properties for each tile
+        };
+
+        // Parse walkable properties for each tile
+        const tileElements = tsxDoc.querySelectorAll("tile");
+        tileElements.forEach(tileEl => {
+          const id = parseInt(tileEl.getAttribute("id"));
+          const properties = tileEl.querySelectorAll("property");
+          properties.forEach(prop => {
+            if (prop.getAttribute("name") === "walkable") {
+              tileset.walkable[id] = prop.getAttribute("value") === "true";
+            }
           });
+        });
 
-          return {
-            firstgid: tilesetInfo.firstgid,
-            name: tilesetName,
-            tileWidth,
-            tileHeight,
-            imageWidth,
-            imageHeight,
-            image: tilesetImage,
-            walkable,
-          };
-        })
-      );
+        console.log("Tileset walkable properties:", tileset.walkable);
+      } catch (err) {
+        console.error(`Failed to load tileset: ${err.message}`);
+      }
 
-      console.log("Loaded tilesets:", tilesets);
-
-      // Parse transition points
       const transitionLayer = data.layers.find(l => l.name === "Transitions" && l.type === "objectgroup");
       if (transitionLayer) {
         transitions = transitionLayer.objects.map(obj => ({
@@ -118,16 +142,13 @@ function loadNewMap(mapPath) {
         transitions = [];
       }
 
-      // Wait for all tileset images to load before drawing
-      Promise.all(tilesets.map(ts => new Promise(resolve => {
-        ts.image.onload = resolve;
-      }))).then(() => {
-        console.log("New map loaded!");
+      tilesetImage.onload = () => {
+        console.log("Tileset loaded:", tileset.name);
         if (gameState === "playing") drawGame();
         else if (gameState === "start") drawStartScreen();
-      });
+      };
     })
-    .catch(err => console.error("Failed to load new map JSON:", err));
+    .catch(err => console.error("Failed to load new map:", err));
 }
 
 // Draw the tile map from Tiled
