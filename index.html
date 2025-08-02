@@ -7,7 +7,15 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="gameCanvas" width="640" height="480"></canvas>
+  <div style="display: flex;">
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+
+    <!-- Dialogue Box -->
+    <div id="dialogueBox">
+      <p id="dialogueText"></p>
+    </div>
+  </div>
   <script src="game.js"></script>
 </body>
 </html>

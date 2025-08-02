@@ -8,17 +8,31 @@ const tilesHigh = canvas.height / tileSize;
 let player = {
   x: 2,
   y: 2,
-  sprite: "airplane",
+  direction: "down",
+  sprite: "down"
 };
 
 const tileImages = {
-  airplane: new Image()
+  up: new Image(),
+  down: new Image(),
+  left: new Image(),
+  right: new Image()
 };
-tileImages.airplane.src = "assets/airplane.png";
+
+tileImages.up.src = "assets/sprites/main_up.png";
+tileImages.down.src = "assets/sprites/main_down.png";
+tileImages.left.src = "assets/sprites/main_left.png";
+tileImages.right.src = "assets/sprites/main_right.png";
 
 let mapData = null;
 let tilesetImage = new Image();
 let tileset = null;
+
+const mapDialogues = {
+  "Korea.tmj": "Welcome to Korea! Explore the bustling streets and enjoy the culture.",
+  "Sydney.tmj": "Welcome to Sydney! Watch out for kangaroos and enjoy the Opera House.",
+  "Newcastle.tmj": "Welcome to Newcastle! A quiet town with beautiful beaches."
+};
 
 let gameState = "start"; // 'start', 'controls', 'playing'
 
@@ -32,59 +46,65 @@ let controlsCloseButton = null;
 
 // Load a new map and reset player position
 let transitions = []; // Store transition points for the current map
+let tilesets = []; // Store all tilesets for the current map
 
 function loadNewMap(mapPath) {
   fetch(mapPath)
     .then(res => res.json())
     .then(async data => {
       mapData = data;
+
+      // Reset player position
       player.x = 7;
       player.y = 6;
 
-      const tilesetInfo = data.tilesets[0];
-      if (!tilesetInfo || !tilesetInfo.source) {
-        console.error("No external tileset found in map data");
-        return;
-      }
+      // Load all tilesets
+      tilesets = await Promise.all(
+        data.tilesets.map(async tilesetInfo => {
+          const tsxPath = `assets/tilesets/${tilesetInfo.source}`;
+          const tsxText = await fetch(tsxPath).then(res => res.text());
+          const parser = new DOMParser();
+          const tsxDoc = parser.parseFromString(tsxText, "application/xml");
 
-      const tsxPath = `assets/tilesets/${tilesetInfo.source}`;
-      const tsxText = await fetch(tsxPath).then(res => res.text());
-      const parser = new DOMParser();
-      const tsxDoc = parser.parseFromString(tsxText, "application/xml");
+          const imageEl = tsxDoc.querySelector("image");
+          const tilesetName = tsxDoc.querySelector("tileset").getAttribute("name");
+          const tileWidth = parseInt(tsxDoc.querySelector("tileset").getAttribute("tilewidth"));
+          const tileHeight = parseInt(tsxDoc.querySelector("tileset").getAttribute("tileheight"));
+          const imageSource = imageEl.getAttribute("source");
+          const imageWidth = parseInt(imageEl.getAttribute("width"));
+          const imageHeight = parseInt(imageEl.getAttribute("height"));
 
-      const imageEl = tsxDoc.querySelector("image");
-      const tilesetName = tsxDoc.querySelector("tileset").getAttribute("name");
-      const tileWidth = parseInt(tsxDoc.querySelector("tileset").getAttribute("tilewidth"));
-      const tileHeight = parseInt(tsxDoc.querySelector("tileset").getAttribute("tileheight"));
-      const imageSource = imageEl.getAttribute("source");
-      const imageWidth = parseInt(imageEl.getAttribute("width"));
-      const imageHeight = parseInt(imageEl.getAttribute("height"));
+          const tilesetImage = new Image();
+          tilesetImage.src = `assets/tilesets/${imageSource}`;
 
-      tilesetImage.src = `assets/tilesets/${imageSource}`;
-      tileset = {
-        firstgid: tilesetInfo.firstgid,
-        name: tilesetName,
-        tileWidth,
-        tileHeight,
-        imagewidth: imageWidth,
-        imageheight: imageHeight,
-        walkable: {}, // Store walkable properties for each tile
-      };
+          const walkable = {};
+          const tileElements = tsxDoc.querySelectorAll("tile");
+          tileElements.forEach(tileEl => {
+            const id = parseInt(tileEl.getAttribute("id"));
+            const properties = tileEl.querySelectorAll("property");
+            properties.forEach(prop => {
+              if (prop.getAttribute("name") === "walkable") {
+                walkable[id] = prop.getAttribute("value") === "true";
+              }
+            });
+          });
 
-      // Parse walkable properties for each tile
-      const tileElements = tsxDoc.querySelectorAll("tile");
-      tileElements.forEach(tileEl => {
-        const id = parseInt(tileEl.getAttribute("id"));
-        const properties = tileEl.querySelectorAll("property");
-        properties.forEach(prop => {
-          if (prop.getAttribute("name") === "walkable") {
-            tileset.walkable[id] = prop.getAttribute("value") === "true";
-          }
-        });
-      });
+          return {
+            firstgid: tilesetInfo.firstgid,
+            name: tilesetName,
+            tileWidth,
+            tileHeight,
+            imageWidth,
+            imageHeight,
+            image: tilesetImage,
+            walkable,
+          };
+        })
+      );
 
-      console.log("Tileset walkable properties:", tileset.walkable);
+      console.log("Loaded tilesets:", tilesets);
 
+      // Parse transition points
       const transitionLayer = data.layers.find(l => l.name === "Transitions" && l.type === "objectgroup");
       if (transitionLayer) {
         transitions = transitionLayer.objects.map(obj => ({
@@ -98,15 +118,17 @@ function loadNewMap(mapPath) {
         transitions = [];
       }
 
-      tilesetImage.onload = () => {
-        console.log("Tileset loaded:", tileset.name);
+      // Wait for all tileset images to load before drawing
+      Promise.all(tilesets.map(ts => new Promise(resolve => {
+        ts.image.onload = resolve;
+      }))).then(() => {
+        console.log("New map loaded!");
         if (gameState === "playing") drawGame();
         else if (gameState === "start") drawStartScreen();
-      };
+      });
     })
-    .catch(err => console.error("Failed to load new map:", err));
+    .catch(err => console.error("Failed to load new map JSON:", err));
 }
-
 
 // Draw the tile map from Tiled
 function drawMap() {
@@ -264,6 +286,15 @@ function movePlayer(dx, dy) {
   const mapWidth = mapData.width;
   const mapHeight = mapData.height;
 
+  // Determine the direction based on movement
+  if (dx === 1) player.direction = "right";
+  else if (dx === -1) player.direction = "left";
+  else if (dy === 1) player.direction = "down";
+  else if (dy === -1) player.direction = "up";
+
+  // Update the sprite to match the direction
+  player.sprite = player.direction;
+
   // Ensure the player stays within bounds
   if (newX >= 0 && newX < mapWidth && newY >= 0 && newY < mapHeight) {
     const tileIndex = newY * mapWidth + newX;
@@ -320,6 +351,7 @@ canvas.addEventListener("click", (e) => {
           drawControlsScreen();
         } else if (btn.text === "Play") {
           gameState = "playing";
+          loadNewMap("assets/maps/Korea.tmj"); // Load Korea map when "Play" is clicked
           drawGame();
         }
       }
@@ -338,9 +370,28 @@ canvas.addEventListener("click", (e) => {
   }
 });
 
+function updateDialogue(text) {
+  const dialogueText = document.getElementById("dialogueText");
+  dialogueText.textContent = ""; // Clear existing text
+
+  let index = 0;
+
+  // Typewriting effect
+  const typeWriter = () => {
+    if (index < text.length) {
+      dialogueText.textContent += text[index];
+      index++;
+      setTimeout(typeWriter, 50); // Adjust typing speed (50ms per letter)
+    }
+  };
+
+  typeWriter();
+}
+
 // Keyboard input for player movement
 document.addEventListener("keydown", (e) => {
-  if (gameState !== "playing") return;
+  if (gameState !== "playing") 
+    return;
 
   if (e.key === "ArrowUp") movePlayer(0, -1);
   else if (e.key === "ArrowDown") movePlayer(0, 1);
@@ -351,5 +402,5 @@ document.addEventListener("keydown", (e) => {
 // On window load, draw start screen
 window.onload = () => {
   drawStartScreen();
-  loadNewMap("assets/maps/Cafe.tmj");
+  // loadNewMap("assets/maps/Korea.tmj");
 };
