@@ -65,19 +65,28 @@ const mapPhonePhotos = {
     "assets/other/Newcastle2.jpg"
   ],
   "LastDay.tmj": [
-    "assets/other/LastDay1.jpg"
+    "assets/other/LastDay1.jpg",
   ],
   "Bedroom1.tmj": [
-    "assets/other/newcastle1.png"
+    "assets/other/InstaDM.png",
+    "assets/other/Spotify.png",
   ],
   "Cinema.tmj": [
-    "assets/other/newcastle1.png"
+    "assets/other/Netflix1.png",
+    "assets/other/Netflix2.jpg",
+    "assets/other/Netflix3.png",
+    "assets/other/Netflix4.jpg",
   ],
   "Museum.tmj": [
-    "assets/other/newcastle1.png"
+    "assets/other/Food1.jpg",
+    "assets/other/Museum1.jpg",
+    "assets/other/Museum2.jpg",
+    "assets/other/Museum3.jpg",
+    "assets/other/Museum4.jpg",
+    "assets/other/Food2.jpg",
   ],
   "Cafe.tmj": [
-    "assets/other/newcastle1.png"
+    "assets/other/MissYou.png"
   ],
   "Bedroom2.tmj": [
     "assets/other/newcastle1.png"
