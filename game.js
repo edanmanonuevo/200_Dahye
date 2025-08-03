@@ -5,7 +5,6 @@ const tileSize = 32;
 const tilesWide = canvas.width / tileSize;
 const tilesHigh = canvas.height / tileSize;
 
-
 let npc = null;
 let player = {
   x: 2,
@@ -121,16 +120,16 @@ function drawPhonePopup() {
 }
 
 const mapDialogues = {
-  "Korea.tmj": "Korea - December 2023.\n\nMake your way to Incheon Airport for a surprise holiday.",
-  "Sydney.tmj": "Welcome to Sydney!\n\nWe hope you enjoy your holiday\n\nEnter the red car to drive to Newcastle.",
-  "Newcastle.tmj": "You have arrived at Merriweather Beach!\n\nHave some fun and enjoy the beach.\n\nCheck out the shop for some fish and chips.\n\nAfter you are done make your way back to Sydney before you go back home to Korea.",
-  "LastDay.tmj": "It's your last day in Sydney.\n\nMake sure to visit all your favorite spots one last time.\n\nAfter taking a photo at the photobooth, it's time to head to the airport.",
-  "Bedroom1.tmj": "Welcome back home!.\n\nLooks like you got an Instagram DM from a friend back in Sydney :0.",
-  "Cinema.tmj": "Teleparty Room!\n\nLet's watch some dramas together :)",
-  "Museum.tmj": "Oh, look who's in Korea!\n\nEnjoy the next few days together.\n\nEat some food, explore the National Museum of Korea, and go shopping.\n\nAfter that, make your way to the cafe one last time together.",
-  "Cafe.tmj": "TOM N TOM'S COFFEE\n\nLooks like someone's a bit late...\n\nWait for your friend to arrive and talk things out before he leaves to go back to Sydneyㅠㅠ.\n\n(I miss you alreadyㅠㅠ I cried after we said goodbye...).",
-  "Bedroom2.tmj": "Back home.\n\nHe's in Sydney, and you both keep in touch...\n\n and one day, he asks you to be his girlfriend <3\n\n.",
-  "Camping.tmj": "200일 축하해!\n\nCan you believe its been 555 days since the first day we met\n\nI'm so happy to have met you that day and to be your boyfriend hehe.\n\nI LOVE YOU <3",
+  "Korea.tmj": "Korea [December 2023]\n\nMake your way to Incheon Airport for a surprise holiday.",
+  "Sydney.tmj": "Welcome to Sydney!\n\nWe hope you enjoy your holiday.\n\nEnter the red car to drive to Newcastle.",
+  "Newcastle.tmj": "You have arrived at Merriweather Beach!\n\nA new friend has arrived.\n\nFollow him to the shop for some fish and chips.\n\nAfter you are done make your way back to Sydney.",
+  "LastDay.tmj": "It's your last day in Sydney.\n\nMake sure to visit all your favorite spots one last time.\n\nTake a photo with your new friend at the photobooth.\n\nAfterwards, it's unfortunately time to head back home.",
+  "Bedroom1.tmj": "Welcome back home!\n\nLooks like you got an Instagram DM from a friend back in Sydney.\n\nGo to your desk to check your phone.",
+  "Cinema.tmj": "You have joined the Teleparty Room!\n\nSit next to your friend and watch dramas together.",
+  "Museum.tmj": "[A couple months later...]\n\nOh, look who's in Korea!\n\nEnjoy the next few days together.\n\nEat some food, explore the National Museum of Korea, and go shopping.\n\nAfterwards, make your way to the cafe one last time together.",
+  "Cafe.tmj": "TOM N TOM'S COFFEE\n\nLooks like someone's a bit late...\n\nWait for your friend to arrive and talk things out before he leaves to go back to Sydneyㅠㅠ.",
+  "Bedroom2.tmj": "Back home.\n\nHe's in Sydney, and you both keep in touch...\n\nGet in your bed to call him.",
+  "Camping.tmj": "200일 축하해!\n\nCan you believe its been 555 days since the first day we met.\n\nI'm so happy to have met you that day and to be your boyfriend hehe.\n\nI LOVE YOU <3",
 };
 
 let gameState = "start"; // 'start', 'controls', 'playing'
@@ -236,31 +235,29 @@ function loadNewMap(mapPath) {
             movingForward: true
           };
           drawGame(); // Redraw to show NPC
-        }, 4000); // 4000 ms = 4 seconds
+        }, 6000);
       } else if (mapName === "Bedroom2.tmj") {
         npc = {
           x: 12, // starting tile
-          y: 4,
+          y: 12,
           direction: "right",
           sprite: "right",
           path: [
-            { x: 12, y: 4 },{ x: 12, y: 5 },{ x: 12, y: 6 },
-            { x: 11, y: 6 },{ x: 10, y: 6 },{ x: 9, y: 6 },{ x: 8, y: 6 },{ x: 7, y: 6 },{ x: 6, y: 6 },
-            { x: 6, y: 5 },{ x: 5, y: 5 },
+            { x: 12, y: 12 },{ x: 13, y: 12 },{ x: 14, y: 12 },{ x: 15, y: 12 },
+            { x: 15, y: 11 },{ x: 15, y: 10 },{ x: 15, y: 9 },{ x: 15, y: 8 },{ x: 15, y: 7 },{ x: 15, y: 6 },
+            { x: 16, y: 6 },{ x: 16, y: 5 },
           ],
           pathIndex: 0,
           movingForward: true
         };
       } else if (mapName === "Camping.tmj") {
         npc = {
-          x: 12, // starting tile
-          y: 4,
-          direction: "right",
-          sprite: "right",
+          x: 17, // starting tile
+          y: 8,
+          direction: "left",
+          sprite: "left",
           path: [
-            { x: 12, y: 4 },{ x: 12, y: 5 },{ x: 12, y: 6 },
-            { x: 11, y: 6 },{ x: 10, y: 6 },{ x: 9, y: 6 },{ x: 8, y: 6 },{ x: 7, y: 6 },{ x: 6, y: 6 },
-            { x: 6, y: 5 },{ x: 5, y: 5 },
+            { x: 16, y: 8 },
           ],
           pathIndex: 0,
           movingForward: true
