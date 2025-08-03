@@ -1558,7 +1558,8 @@
  </tile>
  <tile id="311">
   <properties>
-   <property name="walkable" type="bool" value="false"/>
+   <property name="phonePopup" type="bool" value="true"/>
+   <property name="walkable" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="312">

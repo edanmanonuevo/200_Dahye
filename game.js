@@ -5,6 +5,8 @@ const tileSize = 32;
 const tilesWide = canvas.width / tileSize;
 const tilesHigh = canvas.height / tileSize;
 
+
+let npc = null;
 let player = {
   x: 2,
   y: 2,
@@ -15,11 +17,11 @@ let player = {
 const mapSpawns = {
   "Korea.tmj": { x: 3, y: 3 },
   "Sydney.tmj": { x: 1, y: 6 },
-  "Newcastle.tmj": { x: 7, y: 4 },
-  "LastDay.tmj": { x: 0, y: 10 },
+  "Newcastle.tmj": { x: 3, y: 8 },
+  "LastDay.tmj": { x: 5, y: 4 },
   "Bedroom1.tmj": { x: 7, y: 6 },
-  "Cinema.tmj": { x: 8, y: 8 },
-  "Museum.tmj": { x: 12, y: 4 },
+  "Cinema.tmj": { x: 4, y: 7 },
+  "Museum.tmj": { x: 12, y: 3 },
   "Cafe.tmj": { x: 8, y: 7 },
   "Bedroom2.tmj": { x: 6, y: 6 },
   "Camping.tmj": { x: 2, y: 11 },
@@ -37,6 +39,17 @@ tileImages.down.src = "assets/sprites/main_down.png";
 tileImages.left.src = "assets/sprites/main_left.png";
 tileImages.right.src = "assets/sprites/main_right.png";
 
+const npcSprites = {
+  down: new Image(),
+  up: new Image(),
+  left: new Image(),
+  right: new Image()
+};
+npcSprites.down.src = "assets/sprites/two_down.png";
+npcSprites.up.src = "assets/sprites/two_up.png";
+npcSprites.left.src = "assets/sprites/two_left.png";
+npcSprites.right.src = "assets/sprites/two_right.png";
+
 let mapData = null;
 let tilesetImage = new Image();
 let tileset = null;
@@ -47,20 +60,27 @@ let phonePhotos = [];
 
 // Map-specific phone photos
 const mapPhonePhotos = {
-  "Korea.tmj": [
-    "assets/other/start-bg.png"
-    // Add more Korea photos here
-  ],
-  "Sydney.tmj": [
-    "assets/other/sydney1.png",
-    "assets/other/sydney2.png"
-    // Add more Sydney photos here
-  ],
   "Newcastle.tmj": [
     "assets/other/newcastle1.png"
-    // Add more Newcastle photos here
   ],
-  // Add more maps as needed
+  "LastDay.tmj": [
+    "assets/other/newcastle1.png"
+  ],
+  "Bedroom1.tmj": [
+    "assets/other/newcastle1.png"
+  ],
+  "Cinema.tmj": [
+    "assets/other/newcastle1.png"
+  ],
+  "Museum.tmj": [
+    "assets/other/newcastle1.png"
+  ],
+  "Cafe.tmj": [
+    "assets/other/newcastle1.png"
+  ],
+  "Bedroom2.tmj": [
+    "assets/other/newcastle1.png"
+  ],
 };
 
 function drawPhonePopup() {
@@ -141,6 +161,112 @@ function loadNewMap(mapPath) {
       } else {
         player.x = 7; // default
         player.y = 6; // default
+      }
+
+      if (mapName === "Newcastle.tmj") {
+        npc = {
+          x: 4, // starting tile
+          y: 8,
+          direction: "right",
+          sprite: "right",
+          path: [
+            { x: 4, y: 8 },{ x: 5, y: 8 },{ x: 6, y: 8 },{ x: 7, y: 8 },
+            { x: 7, y: 7 },{ x: 7, y: 6 },{ x: 7, y: 5 },{ x: 7, y: 4 },{ x: 7, y: 3 },
+            { x: 6, y: 3 },{ x: 5, y: 3 },{ x: 4, y: 3 },{ x: 5, y: 3 },
+          ],
+          pathIndex: 0,
+          movingForward: true
+        };
+      } else if (mapName === "LastDay.tmj") {
+        npc = {
+          x: 5, // starting tile
+          y: 5,
+          direction: "right",
+          sprite: "right",
+          path: [
+            { x: 5, y: 5 },{ x: 5, y: 6 },{ x: 5, y: 7 },
+            { x: 4, y: 7 },{ x: 3, y: 7 },{ x: 2, y: 7 },{ x: 1, y: 7 },
+            { x: 0, y: 7 },{ x: 1, y: 7 },
+          ],
+          pathIndex: 0,
+          movingForward: true
+        };
+      } else if (mapName === "Cinema.tmj") {
+        npc = {
+          x: 15, // starting tile
+          y: 7,
+          direction: "right",
+          sprite: "right",
+          path: [
+            { x: 15, y: 7 },{ x: 15, y: 8 },{ x: 15, y: 9 },
+            { x: 14, y: 9 },{ x: 13, y: 9 },{ x: 12, y: 9 },{ x: 11, y: 9 },{ x: 10, y: 9 },
+          ],
+          pathIndex: 0,
+          movingForward: true
+        };
+      } else if (mapName === "Museum.tmj") {
+        npc = {
+          x: 12, // starting tile
+          y: 4,
+          direction: "right",
+          sprite: "right",
+          path: [
+            { x: 12, y: 4 },{ x: 12, y: 5 },{ x: 12, y: 6 },
+            { x: 11, y: 6 },{ x: 10, y: 6 },{ x: 9, y: 6 },{ x: 8, y: 6 },{ x: 7, y: 6 },{ x: 6, y: 6 },
+            { x: 6, y: 5 },{ x: 5, y: 5 },
+          ],
+          pathIndex: 0,
+          movingForward: true
+        };
+      } else if (mapName === "Cafe.tmj") {
+        npc = null; // Don't spawn NPC immediately
+        setTimeout(() => {
+          npc = {
+            x: 8, // starting tile
+            y: 4,
+            direction: "right",
+            sprite: "right",
+            path: [
+              { x: 8, y: 4 },{ x: 8, y: 5 },{ x: 8, y: 6 },{ x: 8, y: 7 },{ x: 8, y: 8 },
+              { x: 9, y: 8 },{ x: 10, y: 8 },
+              { x: 10, y: 9 },{ x: 11, y: 9 },{ x: 12, y: 9 },{ x: 13, y: 9 },{ x: 14, y: 9 },{ x: 15, y: 9 },{ x: 16, y: 9 },
+              { x: 16, y: 10 },{ x: 15, y: 10 },
+            ],
+            pathIndex: 0,
+            movingForward: true
+          };
+          drawGame(); // Redraw to show NPC
+        }, 4000); // 4000 ms = 4 seconds
+      } else if (mapName === "Bedroom2.tmj") {
+        npc = {
+          x: 12, // starting tile
+          y: 4,
+          direction: "right",
+          sprite: "right",
+          path: [
+            { x: 12, y: 4 },{ x: 12, y: 5 },{ x: 12, y: 6 },
+            { x: 11, y: 6 },{ x: 10, y: 6 },{ x: 9, y: 6 },{ x: 8, y: 6 },{ x: 7, y: 6 },{ x: 6, y: 6 },
+            { x: 6, y: 5 },{ x: 5, y: 5 },
+          ],
+          pathIndex: 0,
+          movingForward: true
+        };
+      } else if (mapName === "Camping.tmj") {
+        npc = {
+          x: 12, // starting tile
+          y: 4,
+          direction: "right",
+          sprite: "right",
+          path: [
+            { x: 12, y: 4 },{ x: 12, y: 5 },{ x: 12, y: 6 },
+            { x: 11, y: 6 },{ x: 10, y: 6 },{ x: 9, y: 6 },{ x: 8, y: 6 },{ x: 7, y: 6 },{ x: 6, y: 6 },
+            { x: 6, y: 5 },{ x: 5, y: 5 },
+          ],
+          pathIndex: 0,
+          movingForward: true
+        };
+      } else {
+        npc = null;
       }
 
       // Set phonePhotos for this map
@@ -302,6 +428,12 @@ function drawPlayer() {
   ctx.drawImage(img, player.x * tileSize, player.y * tileSize, tileSize, tileSize);
 }
 
+function drawNPC() {
+  if (!npc) return;
+  const img = npcSprites[npc.sprite];
+  ctx.drawImage(img, npc.x * tileSize, npc.y * tileSize, tileSize, tileSize);
+}
+
 // Draw start screen with buttons
 function drawButton(btn) {
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -388,6 +520,7 @@ function drawGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawMap();
   drawPlayer();
+  drawNPC();
   drawTextObjects();
   if (phonePopupActive) {
     drawPhonePopup();
@@ -457,6 +590,28 @@ function movePlayer(dx, dy) {
   drawGame();
 }
 
+function updateNPC() {
+  if (!npc) return;
+
+  // Only move if not at the end of the path
+  if (npc.pathIndex < npc.path.length - 1) {
+    // Move NPC along its path every 30 frames (~0.5s at 60fps)
+    if (!updateNPC.frame) updateNPC.frame = 0;
+    updateNPC.frame++;
+    if (updateNPC.frame % 30 !== 0) return;
+
+    let nextIndex = npc.pathIndex + 1;
+    const nextPos = npc.path[nextIndex];
+    if (nextPos.x > npc.x) npc.sprite = "right";
+    else if (nextPos.x < npc.x) npc.sprite = "left";
+    else if (nextPos.y > npc.y) npc.sprite = "down";
+    else if (nextPos.y < npc.y) npc.sprite = "up";
+    npc.x = nextPos.x;
+    npc.y = nextPos.y;
+    npc.pathIndex = nextIndex;
+  }
+  // When npc.pathIndex === npc.path.length - 1, NPC stops moving
+}
 
 // Mouse click handler for start screen, controls, and phone popup
 canvas.addEventListener("click", (e) => {
@@ -563,5 +718,12 @@ document.addEventListener("keydown", (e) => {
 // On window load, draw start screen
 window.onload = () => {
   drawStartScreen();
-  // loadNewMap("assets/maps/Korea.tmj");
+
+  // Start NPC/game loop
+  setInterval(() => {
+    if (gameState === "playing" && npc) {
+      updateNPC();
+      drawGame();
+    }
+  }, 15); // Adjust interval for NPC speed
 };
