@@ -562,24 +562,24 @@ function drawControlsScreen() {
 }
 
 function drawTextObjects() {
-  if (!mapData) return;
+  // if (!mapData) return;
 
-  // Loop through all object layers in the map
-  const objectLayers = mapData.layers.filter(l => l.type === "objectgroup");
-  objectLayers.forEach(layer => {
-    layer.objects.forEach(obj => {
-      if (obj.text && obj.visible) {
-        // Set text properties
-        ctx.fillStyle = obj.text.color || "black"; // Default to black if no color is specified
-        ctx.font = `${obj.text.size || 16}px Arial`; // Default font size is 16px
-        ctx.textAlign = obj.text.halign || "left"; // Default horizontal alignment
-        ctx.textBaseline = obj.text.valign || "top"; // Default vertical alignment
+  // // Loop through all object layers in the map
+  // const objectLayers = mapData.layers.filter(l => l.type === "objectgroup");
+  // objectLayers.forEach(layer => {
+  //   layer.objects.forEach(obj => {
+  //     if (obj.text && obj.visible) {
+  //       // Set text properties
+  //       ctx.fillStyle = obj.text.color || "black"; // Default to black if no color is specified
+  //       ctx.font = `${obj.text.size || 16}px Arial`; // Default font size is 16px
+  //       ctx.textAlign = obj.text.halign || "left"; // Default horizontal alignment
+  //       ctx.textBaseline = obj.text.valign || "top"; // Default vertical alignment
 
-        // Draw the text
-        ctx.fillText(obj.text.text, obj.x, obj.y);
-      }
-    });
-  });
+  //       // Draw the text
+  //       ctx.fillText(obj.text.text, obj.x, obj.y);
+  //     }
+  //   });
+  // });
 }
 
 function drawGame() {
