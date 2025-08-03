@@ -15,6 +15,7 @@ body {
 }
 canvas {
   border: 2px solid white;
+  border-radius: 8px;
 }
 
 /* Style for the dialogue box */

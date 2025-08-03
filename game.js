@@ -190,7 +190,7 @@ const mapDialogues = {
   "Museum.tmj": "[A couple months later...]\n\nOh, look who's in Korea!\n\nEnjoy the next few days together.\n\nEat some food, explore the National Museum of Korea, and go shopping.\n\nAfterwards, make your way to the cafe one last time together.",
   "Cafe.tmj": "TOM N TOMS COFFEE\n\nLooks like someone's a bit late...\n\nWait for Edan to arrive and talk things out before he leaves to go back to Sydneyㅠㅠ.",
   "Bedroom2.tmj": "Back home.\n\nEdan went back home to Sydney, but you both keep in touch...\n\nGet in your bed to call him.",
-  "Camping.tmj": "200일 축하해!\n\nCan you believe it's been 555 days since the first day we met.\n\nI'm so happy to have met you that day and to be your boyfriend hehe.\n\nI LOVE YOU <3",
+  "Camping.tmj": "200일 축하해!\n\nCan you believe it's been 555 days since the first day we met.\n\nI'm so happy to have met you that day and to be your boyfriend hehe.\n\nLets go glamping and toast some s'mores one day.\n\n♡ I LOVE YOU ♡",
 };
 
 let gameState = "start"; // 'start', 'controls', 'playing'
