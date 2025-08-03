@@ -93,7 +93,7 @@
                         {
                          "name":"nextMap",
                          "type":"string",
-                         "value":"assets/maps/lastDay.tmj"
+                         "value":"assets/maps/LastDay.tmj"
                         }],
                  "rotation":0,
                  "type":"",
