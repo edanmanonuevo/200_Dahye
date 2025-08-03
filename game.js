@@ -6,6 +6,8 @@ const tilesWide = canvas.width / tileSize;
 const tilesHigh = canvas.height / tileSize;
 
 let npc = null;
+let hearts = [];
+let showHearts = false;
 let player = {
   x: 2,
   y: 2,
@@ -313,8 +315,24 @@ function loadNewMap(mapPath) {
           pathIndex: 0,
           movingForward: true
         };
+        // Spawn floating hearts
+        showHearts = true;
+        hearts = [];
+        for (let i = 0; i < 15; i++) {
+          hearts.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: 18 + Math.random() * 12,
+            speed: 0.5 + Math.random() * 1.2,
+            drift: (Math.random() - 0.5) * 0.5,
+            alpha: 0.7 + Math.random() * 0.3,
+            floatPhase: Math.random() * Math.PI * 2
+          });
+        }
       } else {
         npc = null;
+        showHearts = false;
+        hearts = [];
       }
 
       // Set phonePhotos for this map
@@ -567,11 +585,50 @@ function drawTextObjects() {
 function drawGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawMap();
+  if (showHearts) drawHearts();
   drawPlayer();
   drawNPC();
   drawTextObjects();
   if (phonePopupActive) {
     drawPhonePopup();
+  }
+}
+
+function drawHearts() {
+  hearts.forEach(h => {
+    ctx.save();
+    ctx.globalAlpha = h.alpha;
+    ctx.translate(h.x, h.y);
+    ctx.scale(h.size / 24, h.size / 24);
+    ctx.beginPath();
+    ctx.moveTo(0, 6);
+    ctx.bezierCurveTo(0, 0, 12, 0, 12, 6);
+    ctx.bezierCurveTo(12, 12, 0, 16, 0, 22);
+    ctx.bezierCurveTo(0, 16, -12, 12, -12, 6);
+    ctx.bezierCurveTo(-12, 0, 0, 0, 0, 6);
+    ctx.closePath();
+    ctx.fillStyle = '#ff5a8a';
+    ctx.shadowColor = '#ffb6c1';
+    ctx.shadowBlur = 8;
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+function updateHearts() {
+  if (!showHearts) return;
+  for (let h of hearts) {
+    h.y -= h.speed;
+    h.x += Math.sin(Date.now() / 600 + h.floatPhase) * h.drift;
+    if (h.y < -30) {
+      h.y = canvas.height + 20;
+      h.x = Math.random() * canvas.width;
+      h.size = 18 + Math.random() * 12;
+      h.speed = 0.5 + Math.random() * 1.2;
+      h.drift = (Math.random() - 0.5) * 0.5;
+      h.alpha = 0.7 + Math.random() * 0.3;
+      h.floatPhase = Math.random() * Math.PI * 2;
+    }
   }
 }
 
@@ -794,11 +851,28 @@ document.addEventListener("keydown", (e) => {
 window.onload = () => {
   drawStartScreen();
 
-  // Start NPC/game loop
+  // Start NPC/game loop and hearts animation
   setInterval(() => {
-    if (gameState === "playing" && npc) {
-      updateNPC();
+    if (gameState === "playing") {
+      if (npc) updateNPC();
+      if (showHearts) updateHearts();
       drawGame();
     }
-  }, 15); // Adjust interval for NPC speed
+  }, 15); // Adjust interval for NPC speed and hearts
 };
+function updateHearts() {
+  if (!showHearts) return;
+  for (let h of hearts) {
+    h.y -= h.speed;
+    h.x += Math.sin(Date.now() / 600 + h.floatPhase) * h.drift;
+    if (h.y < -30) {
+      h.y = canvas.height + 20;
+      h.x = Math.random() * canvas.width;
+      h.size = 18 + Math.random() * 12;
+      h.speed = 0.5 + Math.random() * 1.2;
+      h.drift = (Math.random() - 0.5) * 0.5;
+      h.alpha = 0.7 + Math.random() * 0.3;
+      h.floatPhase = Math.random() * Math.PI * 2;
+    }
+  }
+}
