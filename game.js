@@ -188,7 +188,7 @@ const mapDialogues = {
   "Bedroom1.tmj": "Welcome back home!\n\nLooks like you got an Instagram DM from a friend back in Sydney. Who could it be?\n\nGo to your desk to check your phone.",
   "Cinema.tmj": "You have joined the Teleparty Room!\n\nSit next to Edan and watch dramas together.",
   "Museum.tmj": "[A couple months later...]\n\nOh, look who's in Korea!\n\nEnjoy the next few days together.\n\nEat some food, explore the National Museum of Korea, and go shopping.\n\nAfterwards, make your way to the cafe one last time together.",
-  "Cafe.tmj": "TOM N TOM'S COFFEE\n\nLooks like someone's a bit late...\n\nWait for Edan to arrive and talk things out before he leaves to go back to Sydneyㅠㅠ.",
+  "Cafe.tmj": "TOM N TOMS COFFEE\n\nLooks like someone's a bit late...\n\nWait for Edan to arrive and talk things out before he leaves to go back to Sydneyㅠㅠ.",
   "Bedroom2.tmj": "Back home.\n\nEdan went back home to Sydney, but you both keep in touch...\n\nGet in your bed to call him.",
   "Camping.tmj": "200일 축하해!\n\nCan you believe it's been 555 days since the first day we met.\n\nI'm so happy to have met you that day and to be your boyfriend hehe.\n\nI LOVE YOU <3",
 };
