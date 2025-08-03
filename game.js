@@ -57,13 +57,15 @@ let phonePopupActive = false;
 let currentPhotoIndex = 0;
 let phonePhotos = [];
 
+
 // Map-specific phone photos
 const mapPhonePhotos = {
   "Newcastle.tmj": [
-    "assets/other/newcastle1.png"
+    "assets/other/Newcastle1.jpg",
+    "assets/other/Newcastle2.jpg"
   ],
   "LastDay.tmj": [
-    "assets/other/newcastle1.png"
+    "assets/other/LastDay1.jpg"
   ],
   "Bedroom1.tmj": [
     "assets/other/newcastle1.png"
@@ -83,7 +85,6 @@ const mapPhonePhotos = {
 };
 
 function drawPhonePopup() {
-  console.log("drawPhonePopup called"); // Add this line
   // Dim background
   ctx.save();
   ctx.globalAlpha = 0.7;
@@ -92,37 +93,76 @@ function drawPhonePopup() {
   ctx.globalAlpha = 1.0;
   ctx.restore();
 
-  // Phone frame
+  // Use phone image as frame
+  const phoneImg = new Image();
+  phoneImg.src = "assets/other/phone-frame.png";
   const popupW = 320, popupH = 480;
   const popupX = (canvas.width - popupW) / 2;
   const popupY = (canvas.height - popupH) / 2;
-  ctx.fillStyle = '#222';
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 6;
-  ctx.fillRect(popupX, popupY, popupW, popupH);
-  ctx.strokeRect(popupX, popupY, popupW, popupH);
 
-  // Photo
-  const img = new Image();
-  img.src = phonePhotos[currentPhotoIndex];
-  img.onload = function() {
-    ctx.drawImage(img, popupX + 20, popupY + 60, popupW - 40, popupH - 120);
+  phoneImg.onload = function() {
+    ctx.drawImage(phoneImg, popupX, popupY, popupW, popupH);
+
+    // Draw the photo inside the phone screen area (adjust these offsets as needed)
+    const photoX = popupX + 50;
+    const photoY = popupY + 60;
+    const photoW = 220;
+    const photoH = (photoW/3) * 4; // Maintain aspect ratio (4:3)
+
+    const img = new Image();
+    img.src = phonePhotos[currentPhotoIndex];
+    img.onload = function() {
+      ctx.drawImage(img, photoX, photoY, photoW, photoH);
+    };
+    if (img.complete) {
+      ctx.drawImage(img, photoX, photoY, photoW, photoH);
+    }
+
+    // Draw left/right arrows if multiple photos
+    if (phonePhotos.length > 1) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(225, 225, 225, 0.5)';
+      // Arrow vertical center aligned with photo
+      const arrowY = photoY + photoH / 2;
+      // Move arrows 40px outside the phone frame
+      const leftArrowX = popupX - 40;
+      const rightArrowX = popupX + popupW + 40;
+
+      // Left arrow
+      ctx.beginPath();
+      ctx.moveTo(leftArrowX, arrowY);
+      ctx.lineTo(leftArrowX + 30, arrowY - 30);
+      ctx.lineTo(leftArrowX + 30, arrowY + 30);
+      ctx.closePath();
+      ctx.fill();
+
+      // Right arrow
+      ctx.beginPath();
+      ctx.moveTo(rightArrowX, arrowY);
+      ctx.lineTo(rightArrowX - 30, arrowY - 30);
+      ctx.lineTo(rightArrowX - 30, arrowY + 30);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Draw close button (optional: overlay on the phone image)
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px MyFont';
+    ctx.textAlign = 'center';
+    ctx.fillText('Close', (popupX + popupW / 2)-6, popupY + popupH - 53);
   };
-  if (img.complete) {
-    ctx.drawImage(img, popupX + 20, popupY + 60, popupW - 40, popupH - 120);
-  }
 
-  // Close button
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 24px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('Close', popupX + popupW / 2, popupY + popupH - 30);
+  // If image is already loaded (cache), draw immediately
+  if (phoneImg.complete) {
+    phoneImg.onload();
+  }
 }
 
 const mapDialogues = {
   "Korea.tmj": "Korea [December 2023]\n\nMake your way to Incheon Airport for a surprise holiday.",
   "Sydney.tmj": "Welcome to Sydney!\n\nWe hope you enjoy your holiday.\n\nEnter the red car to drive to Newcastle.",
-  "Newcastle.tmj": "You have arrived at Merriweather Beach!\n\nA new friend has arrived.\n\nFollow him to the shop for some fish and chips.\n\nAfter you are done make your way back to Sydney.",
+  "Newcastle.tmj": "You have arrived at Merewether Beach!\n\nA new friend has arrived.\n\nFollow him to the shop for some fish and chips.\n\nAfter you are done make your way back to Sydney.",
   "LastDay.tmj": "It's your last day in Sydney.\n\nMake sure to visit all your favorite spots one last time.\n\nTake a photo with your new friend at the photobooth.\n\nAfterwards, it's unfortunately time to head back home.",
   "Bedroom1.tmj": "Welcome back home!\n\nLooks like you got an Instagram DM from a friend back in Sydney.\n\nGo to your desk to check your phone.",
   "Cinema.tmj": "You have joined the Teleparty Room!\n\nSit next to your friend and watch dramas together.",
@@ -223,8 +263,8 @@ function loadNewMap(mapPath) {
           npc = {
             x: 8, // starting tile
             y: 4,
-            direction: "right",
-            sprite: "right",
+            direction: "down",
+            sprite: "down",
             path: [
               { x: 8, y: 4 },{ x: 8, y: 5 },{ x: 8, y: 6 },{ x: 8, y: 7 },{ x: 8, y: 8 },
               { x: 9, y: 8 },{ x: 10, y: 8 },
@@ -617,10 +657,37 @@ canvas.addEventListener("click", (e) => {
   const mouseY = e.clientY - rect.top;
 
   if (phonePopupActive) {
-    // Detect click on close button
     const popupW = 320, popupH = 480;
     const popupX = (canvas.width - popupW) / 2;
     const popupY = (canvas.height - popupH) / 2;
+    const photoX = popupX + 50;
+    const photoY = popupY + 60;
+    const photoW = 220;
+    const photoH = (photoW/3) * 4;
+    const arrowY = photoY + photoH / 2;
+    const leftArrowX = popupX - 40;
+    const rightArrowX = popupX + popupW + 40;
+    // Detect click on left arrow (outside phone)
+    if (
+      phonePhotos.length > 1 &&
+      mouseX >= leftArrowX && mouseX <= leftArrowX + 30 &&
+      mouseY >= arrowY - 30 && mouseY <= arrowY + 30
+    ) {
+      currentPhotoIndex = (currentPhotoIndex - 1 + phonePhotos.length) % phonePhotos.length;
+      drawGame();
+      return;
+    }
+    // Detect click on right arrow (outside phone)
+    if (
+      phonePhotos.length > 1 &&
+      mouseX >= rightArrowX - 30 && mouseX <= rightArrowX &&
+      mouseY >= arrowY - 30 && mouseY <= arrowY + 30
+    ) {
+      currentPhotoIndex = (currentPhotoIndex + 1) % phonePhotos.length;
+      drawGame();
+      return;
+    }
+    // Detect click on close button
     if (
       mouseX >= popupX && mouseX <= popupX + popupW &&
       mouseY >= popupY + popupH - 60 && mouseY <= popupY + popupH
