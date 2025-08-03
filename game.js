@@ -171,7 +171,7 @@ function drawPhonePopup() {
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 20px MyFont';
     ctx.textAlign = 'center';
-    ctx.fillText('Close', (popupX + popupW / 2)-6, popupY + popupH - 53);
+    ctx.fillText('Close', (popupX + popupW / 2)-6, popupY + popupH - 44);
   };
 
   // If image is already loaded (cache), draw immediately
