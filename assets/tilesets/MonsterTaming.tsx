@@ -663,6 +663,7 @@
  </tile>
  <tile id="132">
   <properties>
+   <property name="phonePopup" type="bool" value="true"/>
    <property name="walkable" type="bool" value="true"/>
   </properties>
  </tile>
@@ -5333,7 +5334,8 @@
  </tile>
  <tile id="1066">
   <properties>
-   <property name="walkable" type="bool" value="false"/>
+   <property name="phonePopup" type="bool" value="true"/>
+   <property name="walkable" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="1067">

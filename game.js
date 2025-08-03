@@ -41,6 +41,65 @@ let mapData = null;
 let tilesetImage = new Image();
 let tileset = null;
 
+let phonePopupActive = false;
+let currentPhotoIndex = 0;
+let phonePhotos = [];
+
+// Map-specific phone photos
+const mapPhonePhotos = {
+  "Korea.tmj": [
+    "assets/other/start-bg.png"
+    // Add more Korea photos here
+  ],
+  "Sydney.tmj": [
+    "assets/other/sydney1.png",
+    "assets/other/sydney2.png"
+    // Add more Sydney photos here
+  ],
+  "Newcastle.tmj": [
+    "assets/other/newcastle1.png"
+    // Add more Newcastle photos here
+  ],
+  // Add more maps as needed
+};
+
+function drawPhonePopup() {
+  console.log("drawPhonePopup called"); // Add this line
+  // Dim background
+  ctx.save();
+  ctx.globalAlpha = 0.7;
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 1.0;
+  ctx.restore();
+
+  // Phone frame
+  const popupW = 320, popupH = 480;
+  const popupX = (canvas.width - popupW) / 2;
+  const popupY = (canvas.height - popupH) / 2;
+  ctx.fillStyle = '#222';
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 6;
+  ctx.fillRect(popupX, popupY, popupW, popupH);
+  ctx.strokeRect(popupX, popupY, popupW, popupH);
+
+  // Photo
+  const img = new Image();
+  img.src = phonePhotos[currentPhotoIndex];
+  img.onload = function() {
+    ctx.drawImage(img, popupX + 20, popupY + 60, popupW - 40, popupH - 120);
+  };
+  if (img.complete) {
+    ctx.drawImage(img, popupX + 20, popupY + 60, popupW - 40, popupH - 120);
+  }
+
+  // Close button
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 24px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Close', popupX + popupW / 2, popupY + popupH - 30);
+}
+
 const mapDialogues = {
   "Korea.tmj": "Korea - December 2023.\n\nMake your way to Incheon Airport for a surprise holiday.",
   "Sydney.tmj": "Welcome to Sydney!\n\nWe hope you enjoy your holiday\n\nEnter the red car to drive to Newcastle.",
@@ -73,6 +132,7 @@ function loadNewMap(mapPath) {
     .then(async data => {
       mapData = data;
       
+
       // Set spawn point based on map filename
       const mapName = mapPath.split("/").pop();
       if (mapSpawns[mapName]) {
@@ -82,6 +142,14 @@ function loadNewMap(mapPath) {
         player.x = 7; // default
         player.y = 6; // default
       }
+
+      // Set phonePhotos for this map
+      if (mapPhonePhotos[mapName]) {
+        phonePhotos = mapPhonePhotos[mapName];
+      } else {
+        phonePhotos = ["assets/other/start-bg.png"];
+      }
+      currentPhotoIndex = 0;
 
       if (mapDialogues[mapName]) {
         updateDialogue(mapDialogues[mapName]);
@@ -125,8 +193,9 @@ function loadNewMap(mapPath) {
           walkable: {}, // Store walkable properties for each tile
         };
 
-        // Parse walkable properties for each tile
+        // Parse walkable and phonePopup properties for each tile
         const tileElements = tsxDoc.querySelectorAll("tile");
+        tileset.phonePopup = {};
         tileElements.forEach(tileEl => {
           const id = parseInt(tileEl.getAttribute("id"));
           const properties = tileEl.querySelectorAll("property");
@@ -134,10 +203,14 @@ function loadNewMap(mapPath) {
             if (prop.getAttribute("name") === "walkable") {
               tileset.walkable[id] = prop.getAttribute("value") === "true";
             }
+            if (prop.getAttribute("name") === "phonePopup") {
+              tileset.phonePopup[id] = prop.getAttribute("value") === "true";
+            }
           });
         });
 
         console.log("Tileset walkable properties:", tileset.walkable);
+        console.log("Tileset phonePopup properties:", tileset.phonePopup);
       } catch (err) {
         console.error(`Failed to load tileset: ${err.message}`);
       }
@@ -316,10 +389,13 @@ function drawGame() {
   drawMap();
   drawPlayer();
   drawTextObjects();
+  if (phonePopupActive) {
+    drawPhonePopup();
+  }
 }
 
 function movePlayer(dx, dy) {
-  if (!mapData) return;
+  if (!mapData || phonePopupActive) return;
 
   const newX = player.x + dx;
   const newY = player.y + dy;
@@ -344,6 +420,14 @@ function movePlayer(dx, dy) {
     // Check if the tile is walkable
     if (!tileset.walkable[gid]) {
       console.log(`Tile at (${newX}, ${newY}) is not walkable.`);
+      return;
+    }
+
+    // Check for phonePopup property (set in tileset)
+    if (tileset.phonePopup && tileset.phonePopup[gid]) {
+      phonePopupActive = true;
+      currentPhotoIndex = 0;
+      drawGame();
       return;
     }
 
@@ -373,11 +457,27 @@ function movePlayer(dx, dy) {
   drawGame();
 }
 
-// Mouse click handler for start screen and controls
+
+// Mouse click handler for start screen, controls, and phone popup
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
+
+  if (phonePopupActive) {
+    // Detect click on close button
+    const popupW = 320, popupH = 480;
+    const popupX = (canvas.width - popupW) / 2;
+    const popupY = (canvas.height - popupH) / 2;
+    if (
+      mouseX >= popupX && mouseX <= popupX + popupW &&
+      mouseY >= popupY + popupH - 60 && mouseY <= popupY + popupH
+    ) {
+      phonePopupActive = false;
+      drawGame();
+    }
+    return;
+  }
 
   if (gameState === "start") {
     startButtons.forEach(btn => {
@@ -435,8 +535,22 @@ function updateDialogue(text) {
   typeWriter();
 }
 
-// Keyboard input for player movement
+
+// Keyboard input for player movement and phone popup
 document.addEventListener("keydown", (e) => {
+  if (phonePopupActive) {
+    if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+      phonePopupActive = false;
+      drawGame();
+    } else if (e.key === "ArrowRight") {
+      currentPhotoIndex = (currentPhotoIndex + 1) % phonePhotos.length;
+      drawGame();
+    } else if (e.key === "ArrowLeft") {
+      currentPhotoIndex = (currentPhotoIndex - 1 + phonePhotos.length) % phonePhotos.length;
+      drawGame();
+    }
+    return;
+  }
   if (gameState !== "playing") 
     return;
 
