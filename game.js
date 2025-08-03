@@ -59,6 +59,7 @@ let phonePopupActive = false;
 let currentPhotoIndex = 0;
 let phonePhotos = [];
 
+let currentMapName = "";
 
 // Map-specific phone photos
 const mapPhonePhotos = {
@@ -207,6 +208,7 @@ function loadNewMap(mapPath) {
 
       // Set spawn point based on map filename
       const mapName = mapPath.split("/").pop();
+      currentMapName = mapName;
       if (mapSpawns[mapName]) {
         player.x = mapSpawns[mapName].x;
         player.y = mapSpawns[mapName].y;
@@ -504,7 +506,7 @@ function drawNPC() {
 function drawButton(btn) {
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 1;
   ctx.fillRect(btn.x, btn.y, btn.width, btn.height);
   ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
   ctx.fillStyle = 'white';
@@ -540,22 +542,22 @@ function drawControlsScreen() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.fillStyle = 'white';
-  ctx.font = '28px Arial';
+  ctx.font = '28px MyFont';
   ctx.textAlign = 'center';
-  ctx.fillText("Use Arrow Keys to Move", canvas.width / 2, 100);
+  ctx.fillText("Use Arrow Keys to Move", canvas.width / 2, 160);
 
   ctx.font = '64px Arial';
-  ctx.fillText("⬆️ ⬇️ ⬅️ ➡️", canvas.width / 2, 170);
+  ctx.fillText("⬆️ ⬇️ ⬅️ ➡️", canvas.width / 2, 235);
 
-  const closeBtn = { x: canvas.width / 2 - 75, y: 220, width: 150, height: 50 };
+  const closeBtn = { x: canvas.width / 2 - 75, y: 290, width: 150, height: 50 };
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 1;
   ctx.fillRect(closeBtn.x, closeBtn.y, closeBtn.width, closeBtn.height);
   ctx.strokeRect(closeBtn.x, closeBtn.y, closeBtn.width, closeBtn.height);
 
   ctx.fillStyle = 'white';
-  ctx.font = '28px Arial';
+  ctx.font = '28px MyFont';
   ctx.fillText("Close", canvas.width / 2, closeBtn.y + closeBtn.height / 2);
 
   controlsCloseButton = closeBtn;
@@ -580,15 +582,53 @@ function drawTextObjects() {
   //     }
   //   });
   // });
+
+  if (currentMapName === "Korea.tmj") {
+    ctx.save();
+    ctx.font = "bold 16px MyFont, Arial";
+    ctx.fillStyle = "#aaa8bd";
+    ctx.textAlign = "center";
+    // ctx.shadowColor = "#000";
+    ctx.shadowBlur = 6;
+    ctx.fillText("Incheon Airport ➤", canvas.width - 143, canvas.height / 2 + 31);
+    ctx.restore();
+  } else if (currentMapName === "Newcastle.tmj") {
+    ctx.save();
+    ctx.font = "bold 16px MyFont, Arial";
+    ctx.fillStyle = "#843d11";
+    ctx.textAlign = "center";
+    // ctx.shadowColor = "#000";
+    ctx.shadowBlur = 6;
+    ctx.fillText("Sydney ➤", canvas.width - 50, canvas.height / 2);
+    ctx.restore();
+  } else if (currentMapName === "LastDay.tmj") {
+    ctx.save();
+    ctx.font = "bold 16px MyFont, Arial";
+    ctx.fillStyle = "#83769c";
+    ctx.textAlign = "center";
+    // ctx.shadowColor = "#000";
+    ctx.shadowBlur = 6;
+    ctx.fillText("Sydney Airport", canvas.width - 100, canvas.height - 146);
+    ctx.restore();
+  } else if (currentMapName === "Museum.tmj") {
+    ctx.save();
+    ctx.font = "bold 16px MyFont, Arial";
+    ctx.fillStyle = "#aaa8bd";
+    ctx.textAlign = "center";
+    // ctx.shadowColor = "#000";
+    ctx.shadowBlur = 6;
+    ctx.fillText("➤", canvas.width - 20, canvas.height / 2 + 31);
+    ctx.restore();
+  }
 }
 
 function drawGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawMap();
   if (showHearts) drawHearts();
+  drawTextObjects();
   drawPlayer();
   drawNPC();
-  drawTextObjects();
   if (phonePopupActive) {
     drawPhonePopup();
   }
