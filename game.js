@@ -1,5 +1,12 @@
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
+// Transition animation state
+let isTransitioning = false;
+let transitionAlpha = 0;
+let transitionDirection = 1; // 1 = fade out, -1 = fade in
+let pendingMapPath = null;
 
 const tileSize = 32;
 const tilesWide = canvas.width / tileSize;
@@ -622,6 +629,7 @@ function drawTextObjects() {
   }
 }
 
+
 function drawGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawMap();
@@ -632,6 +640,44 @@ function drawGame() {
   if (phonePopupActive) {
     drawPhonePopup();
   }
+  // Draw transition overlay if active
+  if (isTransitioning) {
+    ctx.save();
+    ctx.globalAlpha = transitionAlpha;
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
+}
+
+function startMapTransition(nextMapPath) {
+  isTransitioning = true;
+  transitionAlpha = 0;
+  transitionDirection = 1;
+  pendingMapPath = nextMapPath;
+  animateTransition();
+}
+
+function animateTransition() {
+  if (!isTransitioning) return;
+  transitionAlpha += 0.05 * transitionDirection;
+  if (transitionDirection === 1 && transitionAlpha >= 1) {
+    transitionAlpha = 1;
+    // Fade out complete, load new map
+    loadNewMap(pendingMapPath);
+    transitionDirection = -1;
+    setTimeout(animateTransition, 100); // Small pause before fade in
+    return;
+  }
+  if (transitionDirection === -1 && transitionAlpha <= 0) {
+    transitionAlpha = 0;
+    isTransitioning = false;
+    pendingMapPath = null;
+    drawGame();
+    return;
+  }
+  drawGame();
+  setTimeout(animateTransition, 16); // ~60fps
 }
 
 function drawHearts() {
@@ -725,7 +771,7 @@ function movePlayer(dx, dy) {
 
     if (transition) {
       console.log(`Player reached transition zone! Loading ${transition.nextMap}`);
-      loadNewMap(transition.nextMap);
+      startMapTransition(transition.nextMap);
       return;
     } else {
       console.log("No transition zone found at this position.");
@@ -819,7 +865,7 @@ canvas.addEventListener("click", (e) => {
           drawControlsScreen();
         } else if (btn.text === "Play") {
           gameState = "playing";
-          loadNewMap("assets/maps/Korea.tmj"); // Load Korea map when "Play" is clicked
+          startMapTransition("assets/maps/Korea.tmj"); // Use transition animation
           drawGame();
         }
       }
