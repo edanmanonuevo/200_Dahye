@@ -945,6 +945,31 @@ window.onload = () => {
       drawGame();
     }
   }, 15); // Adjust interval for NPC speed and hearts
+  // On-screen arrow controls
+  const upBtn = document.getElementById("arrow-up");
+  const downBtn = document.getElementById("arrow-down");
+  const leftBtn = document.getElementById("arrow-left");
+  const rightBtn = document.getElementById("arrow-right");
+
+  function handleArrow(direction) {
+    if (gameState !== "playing" || phonePopupActive) return;
+    if (direction === "up") movePlayer(0, -1);
+    else if (direction === "down") movePlayer(0, 1);
+    else if (direction === "left") movePlayer(-1, 0);
+    else if (direction === "right") movePlayer(1, 0);
+  }
+
+  if (upBtn && downBtn && leftBtn && rightBtn) {
+    upBtn.addEventListener("click", () => handleArrow("up"));
+    downBtn.addEventListener("click", () => handleArrow("down"));
+    leftBtn.addEventListener("click", () => handleArrow("left"));
+    rightBtn.addEventListener("click", () => handleArrow("right"));
+    // Touch support
+    upBtn.addEventListener("touchstart", e => { e.preventDefault(); handleArrow("up"); });
+    downBtn.addEventListener("touchstart", e => { e.preventDefault(); handleArrow("down"); });
+    leftBtn.addEventListener("touchstart", e => { e.preventDefault(); handleArrow("left"); });
+    rightBtn.addEventListener("touchstart", e => { e.preventDefault(); handleArrow("right"); });
+  }
 };
 function updateHearts() {
   if (!showHearts) return;
